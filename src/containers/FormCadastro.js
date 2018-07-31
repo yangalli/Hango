@@ -1,47 +1,7 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import * as AuthAction from '../store/actions/index';
-
-class FormCadastro extends Component {
-  state = {
-
-  }
-  render() {
-    return (
-      <View style={styles.containerRegister} >
-        <View style={styles.divTitle}>
-          <Text style={styles.title}>Registre-se</Text>
-        </View>
-
-        <View style={styles.divInputs}>
-          <TextInput 
-            value={this.props.name}
-            onChangeText={this.props.onModifyName} 
-            style={styles.name} 
-            placeholder="nome">
-          </TextInput>
-          <TextInput 
-            value={this.props.email}
-            onChangeText={this.props.onModifyEmail}
-            style={styles.email} 
-            placeholder="e-mail">
-          </TextInput>
-          <TextInput 
-            value={this.props.password}
-            onChangeText={this.props.onModifyPassword} 
-            style={styles.password} 
-            placeholder="senha">
-          </TextInput>
-        </View>
-
-        <View style={styles.divButton}>
-          <Button title="Cadastrar" onPress={() => false}></Button>
-        </View>
-      </View>
-    );
-  }
-}
 
 const styles = StyleSheet.create({
   containerRegister: {
@@ -77,14 +37,75 @@ const styles = StyleSheet.create({
   divButton: {
     flex: 2
   },
+  erro: {
+    color: '#ff0000',
+    fontSize: 18
+  }
 
 });
+
+class FormCadastro extends Component {
+  
+  renderBtnRegister() {
+    const { name, email, password } = this.props;
+    if (this.props.loading) {
+      return (
+        <ActivityIndicator size="large" />
+      )
+    }
+    return (
+      <Button title="Cadastrar" onPress={() => this.props.onRegisterUser({ name, email, password })}></Button>
+    )
+  }
+  
+  render() {
+    return (
+      <View style={styles.containerRegister} >
+        <View style={styles.divTitle}>
+          <Text style={styles.title}>Registre-se</Text>
+        </View>
+
+        <View style={styles.divInputs}>
+          <TextInput 
+            value={this.props.name}
+            onChangeText={this.props.onModifyName} 
+            style={styles.name} 
+            placeholder="nome">
+          </TextInput>
+          <TextInput 
+            value={this.props.email}
+            onChangeText={this.props.onModifyEmail}
+            style={styles.email} 
+            placeholder="e-mail"
+            placeholderTextColor='#fff'>
+          </TextInput>
+          <TextInput 
+            value={this.props.password}
+            onChangeText={this.props.onModifyPassword} 
+            secureTextEntry
+            style={styles.password} 
+            placeholder="senha"
+            placeholderTextColor='#fff'>
+          </TextInput>
+          <Text style={styles.erro}>{this.props.registerError}</Text>
+        </View>
+
+        <View style={styles.divButton}>
+          {this.renderBtnRegister()}
+        </View>
+
+      </View>
+    );
+  }
+}
 
 const mapStateToProps = state => {
   return {
     name: state.AuthReducer.name,
     email: state.AuthReducer.email,
-    password: state.AuthReducer.password
+    password: state.AuthReducer.password,
+    registerError: state.AuthReducer.registerError,
+    loading: state.AuthReducer.loading
   }
 }
 
@@ -98,6 +119,9 @@ const mapDispatchToProps = dispatch => {
     },
     onModifyPassword: (text) => {
       dispatch(AuthAction.modifyPassword(text))
+    },
+    onRegisterUser: ({ name, email, password }) => {
+      dispatch(AuthAction.registerUser(name, email, password))
     }
   }
 }

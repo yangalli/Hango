@@ -1,42 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableHighlight, ImageBackground, ActivityIndicator } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { connect } from 'react-redux';
 import * as AuthAction from '../store/actions/index';
-
-class FormLogin extends Component {
-  render() { 
-    return ( 
-      <View style={styles.containerLogin} >
-        <View style={styles.divTitle}>
-          <Text style={styles.title}>Hangô</Text>
-        </View>
-
-        <View style={styles.divInputs}>
-          <TextInput 
-            value={this.props.email} 
-            onChangeText={this.props.onModifyEmail} 
-            style={styles.email} 
-            placeholder="e-mail">
-          </TextInput>
-          <TextInput 
-            value={this.props.password}
-            onChangeText={this.props.onModifyPassword}
-            style={styles.password} 
-            placeholder="senha">
-          </TextInput>
-          <TouchableHighlight onPress={() => Actions.formCadastro()}>
-            <Text style={styles.register}>Ainda não possui cadastro? Cadastre-se</Text>
-          </TouchableHighlight>
-        </View>
-
-        <View style={styles.divButton}>
-          <Button title="Acessar" onPress={() => false}></Button>
-        </View>
-      </View>
-    );
-  }
-}
 
 const styles = StyleSheet.create({
   containerLogin: {
@@ -68,13 +34,75 @@ const styles = StyleSheet.create({
   divButton: {
     flex: 2
   },
-
+  erro: {
+    color: '#ff0000',
+    fontSize: 18
+  }
 });
+
+class FormLogin extends Component {
+
+  renderBtnAccess() {
+    const { email, password } = this.props;
+    if (this.props.loading) {
+      return (
+        <ActivityIndicator size="large"/>
+      )
+    }
+    return(
+      <Button title="Acessar" onPress={() => this.props.onAuthenticateUser({ email, password })}></Button>
+    )
+  }
+
+  render() { 
+    
+    return ( 
+      //<ImageBackground style={{flex: 1, width: null}} source={require('')} >
+        <View style={styles.containerLogin} >
+          <View style={styles.divTitle}>
+            <Text style={styles.title}>Hangô</Text>
+          </View>
+
+          <View style={styles.divInputs}>
+            <TextInput 
+              value={this.props.email} 
+              onChangeText={this.props.onModifyEmail} 
+              style={styles.email} 
+              placeholder="e-mail"
+              placeholderTextColor='#fff'>
+            </TextInput>
+            
+            <TextInput 
+              value={this.props.password}
+              onChangeText={this.props.onModifyPassword}
+              secureTextEntry
+              style={styles.password} 
+              placeholder="senha"
+              placeholderTextColor='#fff'>
+            </TextInput>
+
+            <Text style={styles.erro}>{this.props.loginError}</Text>
+
+            <TouchableHighlight onPress={() => Actions.formCadastro()}>
+              <Text style={styles.register}>Ainda não possui cadastro? Cadastre-se</Text>
+            </TouchableHighlight>
+          </View>
+
+          <View style={styles.divButton}>
+            {this.renderBtnAccess()}
+          </View>
+        </View>
+      //</ImageBackground>
+    );
+  }
+}
 
 const mapStateToProps = state => {
   return {
     email: state.AuthReducer.email,
-    password: state.AuthReducer.password
+    password: state.AuthReducer.password,
+    loginError: state.AuthReducer.loginError,
+    loading: state.AuthReducer.loading
   }
 }
 
@@ -86,7 +114,10 @@ const mapDispatchToProps = dispatch => {
     onModifyPassword: (text) => {
       dispatch(AuthAction.modifyPassword(text))
     },
+    onAuthenticateUser: ({ email, password }) => {
+      dispatch(AuthAction.authenticateUser(email, password))
+    }
   }
 }
- 
+
 export default connect(mapStateToProps, mapDispatchToProps)(FormLogin);

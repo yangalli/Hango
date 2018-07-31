@@ -1,5 +1,7 @@
 export {
   modifyEmail,
   modifyPassword,
-  modifyName
+  modifyName,
+  registerUser,
+  authenticateUser
 } from './AuthActions';
